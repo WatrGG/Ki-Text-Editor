@@ -1,71 +1,118 @@
-#include <iostream>
-#include <string.h>
-#include <fstream> 
+#include "Header.hpp"
+/*
+Credit to Romero Schwarz on Replit for the Read file, edit file and key press ideas
+Link to his Replit here: https://replit.com/@RomeroSchwarz/text-editor#main.cpp
+*/
 
-#define cppStdTags "#include <iostream> \n\n int main() {\n\n}"
-#define hppStdTags "#pragma once \n\n"
+/*
+Credt to w3resource for the detect capitals in string algorythi
+link to website here: https://www.w3resource.com/cpp-exercises/string/cpp-string-exercise-27.php
+*/
+std::string new_str = "";
 
-static int retNum;
+std::string lookForCaps(std::string text)
+{
 
-struct { //The structure used for grouping file details in one spot
-public:
-    std::string fileType;
-    std::string filePath;
-    std::string fileName;
+    for (int i = 0; i < (text.length() - 1); i++)
+    {
+        new_str += text[i];
+        if (isupper(text[i + 1]))
+        {
+            new_str += " ";
+        }
+    }
 
-} fileDetails;
-
-
-void genFile() {
-
-    if (fileDetails.fileType == ".cpp") {
-        std::ofstream userFile(fileDetails.filePath + fileDetails.fileName + ".cpp");
-        userFile << cppStdTags;
-        userFile.close();
-        retNum = 1;
-    } else if (fileDetails.fileType == ".hpp") {
-        std::ofstream userHeader(fileDetails.filePath + fileDetails.fileName + ".hpp");
-        userHeader << hppStdTags;
-        userHeader.close();
-        retNum = 1;
-    } 
-} 
-
-
-
-int main() {
-
-    std::cout << "Welcome to quickCode File creation Wizard V1.0.0\n";
-    std::cout << "Please select from one of the following file types:\n";
-
-    std::cout << ".cpp\n" << std::endl;
-    std::cout << ".hpp" << std::endl;
-
-        std::cin >> fileDetails.fileType;
-
-    std::cout << "Next, please select where you would like this file to be placed: ";
-    
-
-        std::cin >> fileDetails.filePath;
-
-    std::cout << "Finally, please select the name of this file: ";
-
-        std::cin >> fileDetails.fileName;
-
-    std::cout << "Please wait while we generate your file for you..." << std::endl;
-
-    genFile();
-
-while (true) {
-if (retNum == 1) {
-    std::cout << "Your file has been successfully created\n";
-
-    std::cout << "Thank you for using quickCode!" << std::endl;
-    break;
-
-} else {
-    std::cout << "Sorry, there appears to be an issue with your file, please try again..." << std::endl;
-    break;
+    new_str += text.back();
+    return new_str;
 }
+
+void readFile()
+{
+
+    //inputs the text into the buffer and formats it before outputing it to the user
+    bool view = true;
+    std::string text;
+    std::ifstream userFile(fileName);
+    userFile.seekg(0, std::ios::end);
+
+    size_t size = userFile.tellg();
+    std::string buffer(size, ' ');
+    userFile.seekg(0);
+    userFile.read(&buffer[0], size);
+    userFile.close();
+
+    std::cout << buffer << std::endl;
+
+    std::cout << "Press Enter to exit..." << std::endl;
+
+    while (getline(userFile, text))
+    {
+        std::cout << text << "\n";
+    }
+    std::cin.ignore();
+    std::cin.ignore(); // wait for keypress
+
+    std::cout << "\033[2J\033[1;1H";
 }
+
+void editFile()
+{
+    std::string textFromUser;
+
+    std::cout << "Welcome to the editing file submenu" << std::endl;
+    std::cout << "To begin, please enter the name of the file you would like to write to:\t";
+
+    std::cin >> fileName;
+    std::ofstream userFile(fileName);
+
+    std::cout << "To save and exit the file, simply hit the CAPS-LOCK key on your keyboard\n";
+    std::cout << "Don't worry about putting spaces in \n Wherever you might need a space just capitalise the letter next to it and we will handle the rest!" << std::endl;
+    std::cin >> textFromUser;
+
+    lookForCaps(textFromUser);
+
+    while (true)
+    { //will not work on Linux systems, only on windows due to inclusion of windows.h
+        if (GetAsyncKeyState(20))
+        {
+            userFile << new_str;
+            userFile.close();
+            break;
+        }
+    }
+    std::cout << "Press enter to exit..." << std::endl;
+    std::cin.ignore();//waiting for keypress
+    std::cin.ignore();
+            std::cout << "\033[2J\033[1;1H"; //prints code to clear the console
+}
+
+int main()
+{
+    std::string input;
+
+    std::cout << "Welcome to the Ki text Editor" << std::endl;
+    std::cout << "Input 'Read' to enter read mode\nInput 'Write' to eter write mode" << std::endl;
+
+    std::cin >> input;
+
+    while (true)
+    {
+        if (input == "Read")
+        {
+            std::cout << "Enter the name of the File:\t";
+            std::cin >> fileName;
+            readFile();
+            break;
+        }
+        else if (input == "Write")
+        {
+            editFile();
+            break;
+        }
+        else
+        {
+            std::cout << "wrong input, please try again later..." << std::endl;
+            break;
+        }
+    }
 }
